@@ -32,11 +32,14 @@ Fixture: abstract class {
 	run: func -> Bool {
 		failures := VectorList<TestFailedException> new(32, false)
 		result := true
-		This _print((DateTime now toString("%hh:%mm:%ss ") >> this name) >> " ", true)
+		This _print((DateTime now toString("\e[34;1m%hh:%mm:%ss ") >> this name) >> " " >> "\e[0m\n", true)
 		timer := WallTimer new() . start()
 		for (i in 0 .. this tests count) {
 			test := this tests[i]
+			This _print("\e[35m%s\e[0m" format(test name), true)
 			r := true
+			testTimer := WallTimer new() . start()
+			testTime := 0.0
 			try {
 				test run()
 				test free()
@@ -52,7 +55,9 @@ Fixture: abstract class {
 						break
 				}
 			}
-			This _print(r ? "." : "f")
+			testTime = testTimer stop() toSeconds()
+			This _print("\e[50D\e[50C%s (%.3fs)\n" format(r ? "\e[32;1m[PASSED]\033[0m" : "\e[31;1m[FAILED]\e[0m", testTime), true)
+			testTimer free()
 		}
 		if (!result) {
 			if (!This failureNames)
@@ -60,10 +65,10 @@ Fixture: abstract class {
 			This failureNames add(this name clone())
 		}
 		This _print(result ? " done" : " failed")
-		testTime := timer stop() toMilliseconds() / 1000.f
-		This totalTime += testTime
-		if (testTime > 0.1)
-			This _print(" in %.2fs" format(testTime), true)
+		testFixtureTime := timer stop() toMilliseconds() / 1000.f
+		This totalTime += testFixtureTime
+		if (testFixtureTime > 0.1)
+			This _print(" in %.2fs\n" format(testFixtureTime), true)
 		This _print("\n")
 		if (!result) {
 			for (i in 0 .. failures count) {
