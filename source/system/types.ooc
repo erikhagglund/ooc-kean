@@ -9,11 +9,23 @@
 include stddef, ctype, stdbool
 include ./Array
 import Owner
+import Mutex
 
 Object: abstract class {
 	class: Class
 
 	free: virtual func {
+		if (this class != Mutex &&
+			this class != _HashEntry &&
+			Class log)
+		{
+			Class classMutex lock()
+			if (this class == String)
+				Class stringMap remove(this)
+			prev := Class allocMap get(this class name, 0)
+			Class allocMap put(this class name, prev - 1)
+			Class classMutex unlock()
+		}
 		this __destroy__()
 		memfree(this)
 	}
@@ -41,6 +53,12 @@ Object: abstract class {
 }
 
 Class: abstract class {
+
+	classMutex : static Mutex = Mutex new()
+	stringMap : static HashMap<Object, Object> = HashMap<Object, Object> new()
+	allocMap : static HashMap<String, Int> = HashMap<String, Int> new()
+	log : static Bool = true
+
 	// Number of octets to allocate for a new instance of this class
 	instanceSize: SizeT
 
@@ -61,6 +79,17 @@ Class: abstract class {
 		object := calloc(1, this instanceSize) as Object
 		if (object)
 			object class = this
+		if (object class != Mutex &&
+			object class != _HashEntry &&
+			Class log)
+		{
+			Class classMutex lock()
+			if (object class == String)
+				stringMap put(object, object)
+			prev := this allocMap get(object class name, 0)
+			this allocMap put(object class name, prev + 1)
+			Class classMutex unlock()
+		}
 		object
 	}
 	inheritsFrom: final func ~_class (T: This) -> Bool {
