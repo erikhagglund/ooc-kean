@@ -53,7 +53,6 @@ Object: abstract class {
 }
 
 Class: abstract class {
-
 	classMutex : static Mutex = Mutex new()
 	stringMap : static HashMap<Object, Object> = HashMap<Object, Object> new()
 	allocMap : static HashMap<String, Int> = HashMap<String, Int> new()
@@ -81,14 +80,13 @@ Class: abstract class {
 			object class = this
 		if (object class != Mutex &&
 			object class != _HashEntry &&
-			Class log)
-		{
-			Class classMutex lock()
+			This log) {
+			This classMutex lock()
 			if (object class == String)
 				stringMap put(object, object)
 			prev := this allocMap get(object class name, 0)
 			this allocMap put(object class name, prev + 1)
-			Class classMutex unlock()
+			This classMutex unlock()
 		}
 		object
 	}
